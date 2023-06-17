@@ -15,14 +15,22 @@ import org.springframework.security.web.SecurityFilterChain;
 public class ProjectConfig {
 
     @Bean
-    public UserDetailsService userDetailsService() {
-        var userDetailsService = new InMemoryUserDetailsManager();
+    SecurityFilterChain configure(HttpSecurity http)
+            throws Exception {
 
-        var user = User.withUsername("john").password("12345").authorities("read").build();
+        http.httpBasic();
+        http.authorizeHttpRequests().anyRequest().authenticated();
 
-        userDetailsService.createUser(user);
+        var user = User.withUsername("john")
+                .password("12345")
+                .authorities("read")
+                .build();
 
-        return userDetailsService;
+        var userDetailsService = new InMemoryUserDetailsManager(user);
+
+        http.userDetailsService(userDetailsService);
+
+        return http.build();
     }
 
     @Bean
@@ -30,16 +38,35 @@ public class ProjectConfig {
         return NoOpPasswordEncoder.getInstance();
     }
 
-    @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        /*All the requests require authentication.*/
-        http.httpBasic(Customizer.withDefaults()).authorizeHttpRequests((authz) -> authz.anyRequest().authenticated());
+  /*  @Configuration
+    public class ProjectConfig {
 
-        /*None of the requests need to be authenticated.
-         * http.httpBasic(Customizer.withDefaults()).authorizeHttpRequests((authz) -> authz.anyRequest().permitAll());
-         * */
+        @Bean
+        public UserDetailsService userDetailsService() {
+            var userDetailsService = new InMemoryUserDetailsManager();
 
-        return http.build();
-    }
+            var user = User.withUsername("john").password("12345").authorities("read").build();
+
+            userDetailsService.createUser(user);
+
+            return userDetailsService;
+        }
+
+        @Bean
+        public PasswordEncoder passwordEncoder() {
+            return NoOpPasswordEncoder.getInstance();
+        }
+
+        @Bean
+        public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+            *//*All the requests require authentication.*//*
+            http.httpBasic(Customizer.withDefaults()).authorizeHttpRequests((authz) -> authz.anyRequest().authenticated());
+
+            *//*None of the requests need to be authenticated.
+             * http.httpBasic(Customizer.withDefaults()).authorizeHttpRequests((authz) -> authz.anyRequest().permitAll());
+             * *//*
+
+            return http.build();
+        }*/
 
 }
